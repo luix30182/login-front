@@ -10,12 +10,10 @@
         <v-row>
           <v-col cols="12" md="6" offset-md="3">
             <v-text-field
-              v-model="email"
-              :rules="emailRules"
-              placeholder="E-mail"
+              v-model="userName"
+              placeholder="usuario"
               :single-line="true"
               solo
-              type="email"
               clearable
               required
             ></v-text-field>
@@ -52,13 +50,9 @@ export default {
   components: {},
   data() {
     return {
-      email: "",
+      userName: "",
       password: "",
       valid: true,
-      emailRules: [
-        v => !!v || "E-mail is required",
-        v => /.+@.+\..+/.test(v) || "E-mail must be valid"
-      ],
       rules: {
         required: value => !!value || "Required."
       },
@@ -71,9 +65,26 @@ export default {
   methods: {
     logIn: function() {
       /* eslint-disable no-console */
-      console.log(this.email);
-      /* eslint-disable no-console */
-      console.log(this.password);
+      fetch(`/api/user/${this.userName}`)
+        .then(blob => blob.json())
+        .then(data => {
+          if (data[0].password == this.password) {
+            if (data[0].privilegio == 100) {
+              this.$router.push({
+                name: "Admin",
+                params: { user: data[0].nombreUsuario }
+              });
+            } else {
+              this.$router.push({
+                name: "Welcome",
+                params: { user: data[0].nombreUsuario }
+              });
+            }
+          } else {
+            this.text = "verifica tus datos";
+            this.snackbar = true;
+          }
+        });
     }
   }
 };
